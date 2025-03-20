@@ -1,1 +1,64 @@
 /* You can add global styles to this file, and also import other style files */
+@import "./app/styles/variables.css";
+@import "./app/styles/global.css";
+
+:root {
+  --primary-color: #6366f1;
+  --secondary-color: #4f46e5;
+  --accent-color: #38bdf8;
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --background-dark: #0f172a;
+  --background-darker: #020617;
+  --background-card: #1e293b;
+  --shadow-sm: 0 2px 5px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 10px rgba(0, 0, 0, 0.5);
+  --radius-sm: 4px;
+  --radius-md: 8px;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--background-dark);
+  color: var(--text-primary);
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Helvetica, Arial, sans-serif;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.bg-white {
+  background-color: var(--background-card) !important;
+  color: var(--text-primary);
+}
+
+.text-gray-900 {
+  color: var(--text-primary) !important;
+}
+
+.text-gray-700,
+.text-gray-600,
+.text-gray-500 {
+  color: var(--text-secondary) !important;
+}
+
+.bg-gray-100 {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+.border {
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.shadow,
+.shadow-lg {
+  box-shadow: var(--shadow-md) !important;
+}
+
+.bg-gray-50 {
+  background-color: rgba(0, 0, 0, 0.2) !important;
+}

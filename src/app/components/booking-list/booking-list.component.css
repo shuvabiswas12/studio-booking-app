@@ -1,0 +1,84 @@
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th {
+  position: relative;
+  user-select: none;
+}
+
+th:hover {
+  background-color: #f8fafc;
+}
+
+@media (max-width: 768px) {
+  table,
+  thead,
+  tbody,
+  th,
+  td,
+  tr {
+    display: block;
+  }
+
+  thead tr {
+    position: absolute;
+    top: -9999px;
+    left: -9999px;
+  }
+
+  tr {
+    border: 1px solid #ccc;
+    margin-bottom: 10px;
+  }
+
+  td {
+    border: none;
+    position: relative;
+    padding-left: 50% !important;
+  }
+
+  td:before {
+    position: absolute;
+    left: 6px;
+    width: 45%;
+    padding-right: 10px;
+    white-space: nowrap;
+    font-weight: bold;
+  }
+
+  td:nth-of-type(1):before {
+    content: "Date & Time";
+  }
+  td:nth-of-type(2):before {
+    content: "Studio";
+  }
+  td:nth-of-type(3):before {
+    content: "Location";
+  }
+  td:nth-of-type(4):before {
+    content: "Booked By";
+  }
+  td:nth-of-type(5):before {
+    content: "Actions";
+  }
+}

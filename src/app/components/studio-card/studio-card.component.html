@@ -1,0 +1,38 @@
+<div class="studio-card">
+    <div class="studio-image">
+        <img [src]="studio.Images[0] || 'assets/images/studio-placeholder.jpg'" [alt]="studio.Name">
+    </div>
+    <div class="studio-info">
+        <div class="studio-type">{{ studio.Type }}</div>
+        <h3 class="studio-name">{{ studio.Name }}</h3>
+        <div class="studio-location">
+            <i class="fas fa-map-marker-alt"></i> {{ studio.Location.City }}, {{ studio.Location.Area }}
+        </div>
+
+        <div class="studio-rating">
+            <span class="rating-stars">
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star-half-alt"></i>
+            </span>
+            <span class="rating-value">{{ studio.Rating.toFixed(1) }}</span>
+        </div>
+
+        <div class="amenities">
+            <span *ngFor="let amenity of getTopAmenities()" class="amenity-tag">{{ amenity }}</span>
+        </div>
+
+        <p class="studio-description">{{ getShortDescription() }}</p>
+
+        <div class="studio-price">
+            {{ studio.Currency }}{{ studio.PricePerHour }} <span>/ hour</span>
+        </div>
+
+        <div class="studio-actions">
+            <button class="btn-primary" (click)="onBookNow()">Book Now</button>
+            <button class="btn-secondary" (click)="onShowDetails()">Details</button>
+        </div>
+    </div>
+</div>

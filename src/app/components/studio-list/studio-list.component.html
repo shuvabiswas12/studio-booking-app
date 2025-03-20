@@ -1,0 +1,79 @@
+<div class="container">
+    <h1 class="text-center mb-6">Find Your Perfect Studio</h1>
+
+    <!-- Search Panel -->
+    <div class="search-panel mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+                <label for="searchInput" class="text-secondary mb-2 block">Search</label>
+                <input id="searchInput" type="text" [formControl]="searchControl"
+                    placeholder="Search studios by name, location..." class="search-input">
+            </div>
+            <div>
+                <label for="priceRange" class="text-secondary mb-2 block">Price Range</label>
+                <select id="priceRange" [formControl]="priceRangeControl" class="select-input">
+                    <option *ngFor="let range of priceRanges" [value]="range.value">{{ range.label }}</option>
+                </select>
+            </div>
+            <div>
+                <label for="areaSelect" class="text-secondary mb-2 block">Area</label>
+                <select id="areaSelect" [(ngModel)]="selectedArea" (ngModelChange)="onAreaChange()"
+                    class="select-input">
+                    <option value="">All Areas</option>
+                    <option *ngFor="let area of areas" [value]="area">{{ area }}</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Radius Search -->
+        <div class="mt-4">
+            <label class="text-secondary mb-2 block">Search By Radius</label>
+            <div class="flex flex-wrap gap-3">
+                <select [(ngModel)]="selectedRadius" class="select-input" style="max-width: 150px;">
+                    <option *ngFor="let radius of radiusOptions" [value]="radius">{{ radius }} KM</option>
+                </select>
+                <button (click)="searchByRadius()" class="btn-primary">Search Near Me</button>
+                <button (click)="resetFilters()" class="btn-secondary">Reset Filters</button>
+            </div>
+            <div *ngIf="locationError" class="error-message mt-2">
+                {{ locationError }}
+            </div>
+            <div *ngIf="isSearchingByRadius" class="info-message mt-2">
+                Showing studios within {{ selectedRadius }} KM of your location
+            </div>
+        </div>
+    </div>
+
+    <!-- Warning message if no studios found -->
+    <div *ngIf="noStudiosFound" class="alert-warning text-center mb-6">
+        <p>No studios found matching your criteria. Try adjusting your filters.</p>
+    </div>
+
+    <!-- Studio Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <app-studio-card *ngFor="let studio of displayedStudios" [studio]="studio" (bookNow)="onBookStudio($event)"
+            (showDetails)="onShowDetails($event)"></app-studio-card>
+    </div>
+
+    <!-- Pagination -->
+    <div *ngIf="totalPages > 1" class="pagination">
+        <button class="page-btn" [disabled]="currentPage === 1" (click)="previousPage()">
+            <i class="fas fa-chevron-left"></i>
+        </button>
+
+        <button *ngFor="let page of getPageNumbers()" class="page-btn" [class.active]="page === currentPage"
+            (click)="goToPage(page)">
+            {{ page }}
+        </button>
+
+        <button class="page-btn" [disabled]="currentPage === totalPages" (click)="nextPage()">
+            <i class="fas fa-chevron-right"></i>
+        </button>
+    </div>
+</div>
+
+<!-- Booking Form Modal -->
+<div *ngIf="showBookingForm && selectedStudio" class="booking-modal">
+    <app-booking-form [studio]="selectedStudio" (formSubmitted)="handleBookingSubmitted($event)"
+        (formCancelled)="closeBookingForm()"></app-booking-form>
+</div>

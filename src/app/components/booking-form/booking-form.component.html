@@ -1,0 +1,117 @@
+<div class="booking-form">
+    <div class="booking-form-header">
+        <h2>Book {{ studio?.Name }}</h2>
+        <button class="close-btn" (click)="onCancel()">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+
+    <form [formGroup]="bookingForm" (ngSubmit)="onSubmit()">
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="date">Date</label>
+                <input type="date" id="date" formControlName="date" class="form-input">
+                <div *ngIf="bookingForm.get('date')?.invalid && bookingForm.get('date')?.touched" class="error-message">
+                    Date is required
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="startTime">Start Time</label>
+                <select id="startTime" formControlName="startTime" class="form-input">
+                    <option value="">Select time</option>
+                    <option value="09:00">09:00</option>
+                    <option value="10:00">10:00</option>
+                    <option value="11:00">11:00</option>
+                    <option value="12:00">12:00</option>
+                    <option value="13:00">13:00</option>
+                    <option value="14:00">14:00</option>
+                    <option value="15:00">15:00</option>
+                    <option value="16:00">16:00</option>
+                    <option value="17:00">17:00</option>
+                    <option value="18:00">18:00</option>
+                </select>
+                <div *ngIf="bookingForm.get('startTime')?.invalid && bookingForm.get('startTime')?.touched"
+                    class="error-message">
+                    Start time is required
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="endTime">End Time</label>
+                <select id="endTime" formControlName="endTime" class="form-input">
+                    <option value="">Select time</option>
+                    <option value="10:00">10:00</option>
+                    <option value="11:00">11:00</option>
+                    <option value="12:00">12:00</option>
+                    <option value="13:00">13:00</option>
+                    <option value="14:00">14:00</option>
+                    <option value="15:00">15:00</option>
+                    <option value="16:00">16:00</option>
+                    <option value="17:00">17:00</option>
+                    <option value="18:00">18:00</option>
+                    <option value="19:00">19:00</option>
+                </select>
+                <div *ngIf="bookingForm.get('endTime')?.invalid && bookingForm.get('endTime')?.touched"
+                    class="error-message">
+                    End time is required
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="name">Your Name</label>
+                <input type="text" id="name" formControlName="name" class="form-input">
+                <div *ngIf="bookingForm.get('name')?.invalid && bookingForm.get('name')?.touched" class="error-message">
+                    Name is required
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" formControlName="email" class="form-input">
+                <div *ngIf="bookingForm.get('email')?.invalid && bookingForm.get('email')?.touched"
+                    class="error-message">
+                    Please enter a valid email
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="phone">Phone</label>
+                <input type="tel" id="phone" formControlName="phone" class="form-input">
+                <div *ngIf="bookingForm.get('phone')?.invalid && bookingForm.get('phone')?.touched"
+                    class="error-message">
+                    Phone number is required
+                </div>
+            </div>
+        </div>
+
+        <div *ngIf="studio" class="booking-summary">
+            <h3>Booking Summary</h3>
+            <div class="summary-grid">
+                <div class="summary-item">
+                    <span class="label">Studio:</span>
+                    <span class="value">{{ studio.Name }}</span>
+                </div>
+                <div class="summary-item">
+                    <span class="label">Type:</span>
+                    <span class="value">{{ studio.Type }}</span>
+                </div>
+                <div class="summary-item">
+                    <span class="label">Location:</span>
+                    <span class="value">{{ studio.Location.Area }}, {{ studio.Location.City }}</span>
+                </div>
+                <div class="summary-item">
+                    <span class="label">Rate:</span>
+                    <span class="value">{{ studio.Currency }}{{ studio.PricePerHour }}/hour</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="button" class="btn-secondary" (click)="onCancel()">Cancel</button>
+            <button type="submit" class="btn-primary" [disabled]="bookingForm.invalid || !studio">
+                Confirm Booking
+            </button>
+        </div>
+    </form>
+</div>
