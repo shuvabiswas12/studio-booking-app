@@ -6,11 +6,21 @@
         </button>
     </div>
 
+    <!-- Success Message -->
+    <div *ngIf="bookingSuccess" class="success-message">
+        <i class="fas fa-check-circle"></i> {{ bookingSuccess }}
+    </div>
+
+    <!-- Availability Error Message -->
+    <div *ngIf="availabilityError" class="error-banner">
+        <i class="fas fa-exclamation-circle"></i> {{ availabilityError }}
+    </div>
+
     <form [formGroup]="bookingForm" (ngSubmit)="onSubmit()">
         <div class="form-grid">
             <div class="form-group">
                 <label for="date">Date</label>
-                <input type="date" id="date" formControlName="date" class="form-input">
+                <input type="date" id="date" formControlName="date" class="form-input" [min]="minDate">
                 <div *ngIf="bookingForm.get('date')?.invalid && bookingForm.get('date')?.touched" class="error-message">
                     Date is required
                 </div>
@@ -20,16 +30,7 @@
                 <label for="startTime">Start Time</label>
                 <select id="startTime" formControlName="startTime" class="form-input">
                     <option value="">Select time</option>
-                    <option value="09:00">09:00</option>
-                    <option value="10:00">10:00</option>
-                    <option value="11:00">11:00</option>
-                    <option value="12:00">12:00</option>
-                    <option value="13:00">13:00</option>
-                    <option value="14:00">14:00</option>
-                    <option value="15:00">15:00</option>
-                    <option value="16:00">16:00</option>
-                    <option value="17:00">17:00</option>
-                    <option value="18:00">18:00</option>
+                    <option *ngFor="let time of availableStartTimes" [value]="time">{{ time }}</option>
                 </select>
                 <div *ngIf="bookingForm.get('startTime')?.invalid && bookingForm.get('startTime')?.touched"
                     class="error-message">
@@ -41,16 +42,7 @@
                 <label for="endTime">End Time</label>
                 <select id="endTime" formControlName="endTime" class="form-input">
                     <option value="">Select time</option>
-                    <option value="10:00">10:00</option>
-                    <option value="11:00">11:00</option>
-                    <option value="12:00">12:00</option>
-                    <option value="13:00">13:00</option>
-                    <option value="14:00">14:00</option>
-                    <option value="15:00">15:00</option>
-                    <option value="16:00">16:00</option>
-                    <option value="17:00">17:00</option>
-                    <option value="18:00">18:00</option>
-                    <option value="19:00">19:00</option>
+                    <option *ngFor="let time of availableEndTimes" [value]="time">{{ time }}</option>
                 </select>
                 <div *ngIf="bookingForm.get('endTime')?.invalid && bookingForm.get('endTime')?.touched"
                     class="error-message">
@@ -101,16 +93,26 @@
                     <span class="value">{{ studio.Location.Area }}, {{ studio.Location.City }}</span>
                 </div>
                 <div class="summary-item">
+                    <span class="label">Available Hours:</span>
+                    <span class="value">{{ studio.Availability.Open }} - {{ studio.Availability.Close }}</span>
+                </div>
+                <div class="summary-item">
                     <span class="label">Rate:</span>
                     <span class="value">{{ studio.Currency }}{{ studio.PricePerHour }}/hour</span>
+                </div>
+                <div *ngIf="estimatedPrice > 0" class="summary-item total-price">
+                    <span class="label">Estimated Total:</span>
+                    <span class="value">{{ studio.Currency }}{{ estimatedPrice | number:'1.2-2' }}</span>
                 </div>
             </div>
         </div>
 
         <div class="form-actions">
             <button type="button" class="btn-secondary" (click)="onCancel()">Cancel</button>
-            <button type="submit" class="btn-primary" [disabled]="bookingForm.invalid || !studio">
-                Confirm Booking
+            <button type="submit" class="btn-primary"
+                [disabled]="bookingForm.invalid || !studio || isCheckingAvailability">
+                <span *ngIf="isCheckingAvailability">Checking Availability...</span>
+                <span *ngIf="!isCheckingAvailability">Confirm Booking</span>
             </button>
         </div>
     </form>

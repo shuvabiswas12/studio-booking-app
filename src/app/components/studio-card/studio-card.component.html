@@ -1,6 +1,6 @@
 <div class="studio-card">
     <div class="studio-image">
-        <img [src]="studio.Images[0] || 'assets/images/studio-placeholder.jpg'" [alt]="studio.Name">
+        <img [src]="getStudioImage()" [alt]="studio.Name" (error)="handleImageError($event)">
     </div>
     <div class="studio-info">
         <div class="studio-type">{{ studio.Type }}</div>
@@ -11,11 +11,8 @@
 
         <div class="studio-rating">
             <span class="rating-stars">
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star-half-alt"></i>
+                <i *ngFor="let star of getStarRating(studio.Rating)" class="fas"
+                    [ngClass]="{'fa-star': star === 1, 'fa-star-half-alt': star === 0.5, 'fa-star-o': star === 0}"></i>
             </span>
             <span class="rating-value">{{ studio.Rating.toFixed(1) }}</span>
         </div>
@@ -31,8 +28,7 @@
         </div>
 
         <div class="studio-actions">
-            <button class="btn-primary" (click)="onBookNow()">Book Now</button>
-            <button class="btn-secondary" (click)="onShowDetails()">Details</button>
+            <button class="btn-primary full-width" (click)="onBookNow()">Book Now</button>
         </div>
     </div>
 </div>

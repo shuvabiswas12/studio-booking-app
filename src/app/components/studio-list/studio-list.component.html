@@ -25,22 +25,9 @@
             </div>
         </div>
 
-        <!-- Radius Search -->
-        <div class="mt-4">
-            <label class="text-secondary mb-2 block">Search By Radius</label>
-            <div class="flex flex-wrap gap-3">
-                <select [(ngModel)]="selectedRadius" class="select-input" style="max-width: 150px;">
-                    <option *ngFor="let radius of radiusOptions" [value]="radius">{{ radius }} KM</option>
-                </select>
-                <button (click)="searchByRadius()" class="btn-primary">Search Near Me</button>
-                <button (click)="resetFilters()" class="btn-secondary">Reset Filters</button>
-            </div>
-            <div *ngIf="locationError" class="error-message mt-2">
-                {{ locationError }}
-            </div>
-            <div *ngIf="isSearchingByRadius" class="info-message mt-2">
-                Showing studios within {{ selectedRadius }} KM of your location
-            </div>
+        <!-- Filters Reset Button -->
+        <div class="mt-4 text-right">
+            <button (click)="resetFilters()" class="btn-secondary">Reset Filters</button>
         </div>
     </div>
 

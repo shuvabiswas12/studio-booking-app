@@ -82,8 +82,8 @@ body {
 }
 
 .main-content {
-  flex-grow: 1;
-  padding-bottom: 2rem;
+  flex: 1;
+  padding: 2rem 1rem;
 }
 
 .footer {

@@ -27,11 +27,7 @@ export class StudioListComponent implements OnInit {
   areas: string[] = [];
   searchTerm: string = '';
   selectedArea: string = '';
-  radiusOptions: number[] = [5, 10, 20, 30, 50];
-  selectedRadius: number = 10;
-  isSearchingByRadius: boolean = false;
   noStudiosFound: boolean = false;
-  locationError: string | null = null;
 
   // Pagination properties
   currentPage: number = 1;
@@ -49,8 +45,6 @@ export class StudioListComponent implements OnInit {
     { value: '50-100', label: 'Between $50-$100/hr' },
     { value: '100+', label: 'Over $100/hr' },
   ];
-
-  userLocation: { lat: number; lng: number } | null = null;
 
   constructor(private studioService: StudioService) {}
 
@@ -103,111 +97,17 @@ export class StudioListComponent implements OnInit {
   }
 
   onAreaChange(): void {
-    this.isSearchingByRadius = false;
     this.studioService.searchByArea(this.selectedArea);
   }
 
   onAreaSearch(): void {
-    this.isSearchingByRadius = false;
     this.studioService.searchByArea(this.searchTerm);
-  }
-
-  searchByRadius(): void {
-    this.locationError = null;
-    this.isSearchingByRadius = false;
-
-    if (!navigator.geolocation) {
-      this.locationError = 'Geolocation is not supported by your browser';
-      return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        this.userLocation = {
-          lat: position.coords.latitude,
-          lng: position.coords.longitude,
-        };
-        this.performRadiusSearch();
-      },
-      (error) => {
-        this.handleLocationError(error);
-      }
-    );
-  }
-
-  handleLocationError(error: GeolocationPositionError): void {
-    switch (error.code) {
-      case error.PERMISSION_DENIED:
-        this.locationError = 'Location access was denied by the user';
-        break;
-      case error.POSITION_UNAVAILABLE:
-        this.locationError = 'Location information is unavailable';
-        break;
-      case error.TIMEOUT:
-        this.locationError = 'The request to get user location timed out';
-        break;
-      default:
-        this.locationError =
-          'An unknown error occurred while retrieving location';
-        break;
-    }
-  }
-
-  performRadiusSearch(): void {
-    if (!this.userLocation) return;
-
-    const radiusInKm = this.selectedRadius;
-
-    this.filteredStudios = this.studios.filter((studio) => {
-      if (!studio.Location.Coordinates) return false;
-
-      const distance = this.calculateDistance(
-        this.userLocation!.lat,
-        this.userLocation!.lng,
-        studio.Location.Coordinates.Latitude,
-        studio.Location.Coordinates.Longitude
-      );
-
-      return distance <= radiusInKm;
-    });
-
-    this.isSearchingByRadius = true;
-    this.noStudiosFound = this.filteredStudios.length === 0;
-    this.currentPage = 1;
-    this.updatePagination();
-  }
-
-  calculateDistance(
-    lat1: number,
-    lon1: number,
-    lat2: number,
-    lon2: number
-  ): number {
-    // Haversine formula to calculate distance between two points on Earth
-    const R = 6371; // Radius of the Earth in km
-    const dLat = this.deg2rad(lat2 - lat1);
-    const dLon = this.deg2rad(lon2 - lon1);
-    const a =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(this.deg2rad(lat1)) *
-        Math.cos(this.deg2rad(lat2)) *
-        Math.sin(dLon / 2) *
-        Math.sin(dLon / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    const distance = R * c; // Distance in km
-    return distance;
-  }
-
-  deg2rad(deg: number): number {
-    return deg * (Math.PI / 180);
   }
 
   resetFilters(): void {
     this.searchControl.setValue('');
     this.priceRangeControl.setValue('all');
     this.selectedArea = '';
-    this.isSearchingByRadius = false;
-    this.locationError = null;
     this.filteredStudios = [...this.studios];
     this.updatePagination();
   }
@@ -225,11 +125,6 @@ export class StudioListComponent implements OnInit {
   filterStudios(): void {
     const searchTerm = this.searchControl.value?.toLowerCase() || '';
     const priceRange = this.priceRangeControl.value || 'all';
-
-    // Reset radius search when using text search
-    if (searchTerm || priceRange !== 'all' || this.selectedArea) {
-      this.isSearchingByRadius = false;
-    }
 
     this.filteredStudios = this.studios.filter((studio) => {
       // Filter by search term
@@ -336,7 +231,46 @@ export class StudioListComponent implements OnInit {
     // Handle the booking submission
     console.log('Booking submitted:', booking);
     this.closeBookingForm();
-    // Show success message or navigate to bookings page
+
+    // Show success message to user
+    this.showBookingConfirmation(booking);
+  }
+
+  showBookingConfirmation(booking: Booking): void {
+    // Create a non-modal toast message
+    const toast = document.createElement('div');
+    toast.className = 'booking-toast';
+
+    toast.innerHTML = `
+      <div class="toast-content">
+        <i class="fas fa-check-circle"></i>
+        <div class="toast-message">
+          <h4>Booking Confirmed!</h4>
+          <p>Studio: ${booking.studioName}</p>
+          <p>Date: ${new Date(booking.date).toLocaleDateString()}</p>
+          <p>Time: ${booking.startTime} - ${booking.endTime}</p>
+        </div>
+        <button class="toast-close"><i class="fas fa-times"></i></button>
+      </div>
+    `;
+
+    // Add to DOM
+    document.body.appendChild(toast);
+
+    // Add event listener to close button
+    const closeBtn = toast.querySelector('.toast-close');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', () => {
+        document.body.removeChild(toast);
+      });
+    }
+
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+      if (document.body.contains(toast)) {
+        document.body.removeChild(toast);
+      }
+    }, 5000);
   }
 
   extractAreas(): void {

@@ -62,3 +62,74 @@ body {
 .bg-gray-50 {
   background-color: rgba(0, 0, 0, 0.2) !important;
 }
+
+/* Toast notifications */
+.booking-toast {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 9999;
+  background-color: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-radius: 6px;
+  overflow: hidden;
+  animation: slide-in 0.3s ease-out forwards;
+  max-width: 400px;
+  width: 100%;
+  border-left: 4px solid var(--primary-color);
+}
+
+@keyframes slide-in {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.toast-content {
+  display: flex;
+  align-items: flex-start;
+  padding: 16px;
+  position: relative;
+}
+
+.toast-content i.fas.fa-check-circle {
+  color: var(--primary-color);
+  font-size: 24px;
+  margin-right: 12px;
+  margin-top: 4px;
+}
+
+.toast-message {
+  flex: 1;
+}
+
+.toast-message h4 {
+  margin: 0 0 6px 0;
+  color: var(--primary-color);
+}
+
+.toast-message p {
+  margin: 4px 0;
+  font-size: 14px;
+  color: #666;
+}
+
+.toast-close {
+  background: none;
+  border: none;
+  color: #999;
+  cursor: pointer;
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 4px;
+}
+
+.toast-close:hover {
+  color: #333;
+}
