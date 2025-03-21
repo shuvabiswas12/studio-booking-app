@@ -70,14 +70,6 @@
     <!-- Warning message if no studios found in radius search -->
     <div *ngIf="noStudiosInRadius && isSearchingByRadius" class="alert-warning text-center mb-6">
         <p>No studios found within {{ selectedRadius }} KM of your location.</p>
-        <div class="mt-2">
-            <button (click)="selectedRadius = selectedRadius + 10; onRadiusChange()" class="btn-secondary btn-sm">
-                <i class="fas fa-search-plus mr-1"></i> Try {{ selectedRadius + 10 }} KM radius
-            </button>
-            <button (click)="resetFilters()" class="btn-secondary btn-sm ml-2">
-                <i class="fas fa-undo mr-1"></i> Reset search
-            </button>
-        </div>
     </div>
 
     <!-- Studio Grid -->
