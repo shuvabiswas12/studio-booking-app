@@ -11,7 +11,6 @@
   z-index: var(--z-modal);
   padding: 1rem;
 }
-
 .booking-form form {
   width: 100%;
   max-width: 800px;
@@ -21,7 +20,6 @@
   overflow: hidden;
   color: var(--text-primary);
 }
-
 .booking-form-header {
   display: flex;
   justify-content: space-between;
@@ -30,15 +28,13 @@
   background-color: rgba(0, 0, 0, 0.2);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
-
 .booking-form-header h2 {
   margin: 0;
   font-size: var(--font-size-xl);
   font-weight: var(--font-weight-semibold);
 }
-
 .close-btn {
-  background: none;
+  background: 0 0;
   border: none;
   color: var(--text-secondary);
   font-size: var(--font-size-xl);
@@ -50,163 +46,134 @@
   align-items: center;
   justify-content: center;
   border-radius: var(--radius-full);
-  transition: background-color 0.2s ease;
+  transition: background-color 0.2s;
 }
-
+.booking-summary,
+.form-input {
+  background-color: rgba(0, 0, 0, 0.2);
+}
 .close-btn:hover {
   background-color: rgba(255, 255, 255, 0.1);
   color: var(--text-primary);
 }
-
 .form-grid {
   display: grid;
   grid-template-columns: repeat(1, 1fr);
   gap: 1.5rem;
   padding: 1.5rem;
 }
-
 @media (min-width: 640px) {
   .form-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
-
-.form-group {
+.form-group,
+.summary-item {
   display: flex;
   flex-direction: column;
 }
-
 .form-group label {
   margin-bottom: 0.5rem;
   font-size: var(--font-size-sm);
   color: var(--text-secondary);
 }
-
 .form-input {
   padding: 0.75rem;
-  background-color: rgba(0, 0, 0, 0.2);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: var(--radius-sm);
   color: var(--text-primary);
   font-size: var(--font-size-md);
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  transition: border-color 0.3s, box-shadow 0.3s;
 }
-
 .form-input:focus {
-  outline: none;
+  outline: 0;
   border-color: var(--primary-color);
   box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
 }
-
+.booking-summary,
+.form-actions {
+  padding: 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
 .error-message {
   color: var(--error-color);
   font-size: var(--font-size-sm);
   margin-top: 0.5rem;
 }
-
-.booking-summary {
-  background-color: rgba(0, 0, 0, 0.2);
-  padding: 1.5rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-}
-
 .booking-summary h3 {
   font-size: var(--font-size-lg);
   margin-bottom: 1rem;
   font-weight: var(--font-weight-semibold);
 }
-
 .summary-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 1rem;
 }
-
-.summary-item {
-  display: flex;
-  flex-direction: column;
-}
-
 .summary-item .label {
   font-size: var(--font-size-sm);
   color: var(--text-secondary);
   margin-bottom: 0.25rem;
 }
-
 .summary-item .value {
   font-weight: var(--font-weight-medium);
 }
-
 .form-actions {
   display: flex;
   justify-content: flex-end;
-  padding: 1.5rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
   gap: 1rem;
 }
-
+.btn-primary,
+.btn-secondary {
+  padding: 0.75rem 1.5rem;
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
 .btn-primary {
   background-color: var(--primary-color);
-  color: white;
-  padding: 0.75rem 1.5rem;
+  color: #fff;
   border-radius: var(--radius-sm);
-  font-weight: var(--font-weight-medium);
   border: none;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
 }
-
 .btn-primary:hover:not(:disabled) {
   background-color: var(--secondary-color);
 }
-
 .btn-primary:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
-
 .btn-secondary {
   background-color: rgba(255, 255, 255, 0.1);
   color: var(--text-primary);
-  padding: 0.75rem 1.5rem;
   border-radius: var(--radius-sm);
-  font-weight: var(--font-weight-medium);
   border: none;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
 }
-
+.error-banner,
+.success-message {
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+  display: flex;
+  gap: 0.5rem;
+}
 .btn-secondary:hover {
   background-color: rgba(255, 255, 255, 0.2);
 }
-
 .success-message {
   background-color: rgba(72, 187, 120, 0.1);
   color: #48bb78;
-  padding: 1rem;
-  border-radius: 0.5rem;
-  margin-bottom: 1rem;
-  display: flex;
   align-items: center;
-  gap: 0.5rem;
 }
-
 .error-banner {
   background-color: rgba(245, 101, 101, 0.1);
   color: #f56565;
-  padding: 1rem;
-  border-radius: 0.5rem;
-  margin-bottom: 1rem;
-  display: flex;
   align-items: center;
-  gap: 0.5rem;
 }
-
 .total-price {
-  font-weight: bold;
+  font-weight: 700;
   font-size: 1.1em;
 }
-
 .total-price .value {
   color: var(--primary-color);
 }
