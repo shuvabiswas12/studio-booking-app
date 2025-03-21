@@ -50,13 +50,6 @@ export class StudioListComponent implements OnInit {
   showBookingForm: boolean = false;
 
   searchControl = new FormControl('');
-  priceRangeControl = new FormControl('all');
-  priceRanges = [
-    { value: 'all', label: 'All Prices' },
-    { value: '0-50', label: 'Under $50/hr' },
-    { value: '50-100', label: 'Between $50-$100/hr' },
-    { value: '100+', label: 'Over $100/hr' },
-  ];
 
   // Properties for UI state
   isLoading: boolean = true;
@@ -130,11 +123,6 @@ export class StudioListComponent implements OnInit {
         this.generateSuggestions(searchText || '');
         this.filterStudios(searchText || '');
       });
-
-    this.priceRangeControl.valueChanges.subscribe((priceRange) => {
-      this.isSearchingByRadius = false;
-      this.filterStudios(this.searchControl.value || '');
-    });
   }
 
   loadStudios(): void {
@@ -396,7 +384,6 @@ export class StudioListComponent implements OnInit {
 
   resetFilters(): void {
     this.searchControl.setValue('');
-    this.priceRangeControl.setValue('all');
     this.isSearchingByRadius = false;
     this.isRealTimeFiltering = false;
     this.locationError = null;

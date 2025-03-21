@@ -186,8 +186,8 @@ export class BookingFormComponent {
     };
 
     // Save to localStorage
-    this.bookingService.saveBooking(booking).subscribe(
-      (success) => {
+    this.bookingService.saveBooking(booking).subscribe({
+      next: (success) => {
         if (success) {
           this.bookingSuccess = 'Booking confirmed! Details have been saved.';
           setTimeout(() => {
@@ -198,11 +198,11 @@ export class BookingFormComponent {
             'Error saving your booking. Please try again.';
         }
       },
-      (error) => {
+      error: (error) => {
         this.availabilityError = 'Error saving your booking. Please try again.';
         console.error('Error saving booking:', error);
-      }
-    );
+      },
+    });
   }
 
   onCancel(): void {

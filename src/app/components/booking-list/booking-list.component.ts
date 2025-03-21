@@ -28,17 +28,17 @@ export class BookingListComponent implements OnInit {
     this.isLoading = true;
     this.errorMessage = '';
 
-    this.bookingService.getBookings().subscribe(
-      (bookings) => {
+    this.bookingService.getBookings().subscribe({
+      next: (bookings) => {
         this.bookings = bookings;
         this.sortBookings();
         this.isLoading = false;
       },
-      (error) => {
+      error: (err) => {
         this.errorMessage = 'Error loading bookings. Please try again.';
         this.isLoading = false;
-      }
-    );
+      },
+    });
   }
 
   sortBookings(): void {
@@ -97,18 +97,18 @@ export class BookingListComponent implements OnInit {
 
   deleteBooking(bookingId: string): void {
     if (confirm('Are you sure you want to cancel this booking?')) {
-      this.bookingService.deleteBooking(bookingId).subscribe(
-        (success) => {
+      this.bookingService.deleteBooking(bookingId).subscribe({
+        next: (success) => {
           if (success) {
             this.loadBookings();
           } else {
             this.errorMessage = 'Failed to cancel booking. Please try again.';
           }
         },
-        (error) => {
+        error: (error) => {
           this.errorMessage = 'Error cancelling booking. Please try again.';
-        }
-      );
+        },
+      });
     }
   }
 

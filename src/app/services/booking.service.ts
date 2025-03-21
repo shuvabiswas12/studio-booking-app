@@ -34,7 +34,6 @@ export class BookingService {
         bookings = JSON.parse(bookingsJson);
       }
 
-      // Don't overwrite the booking ID if it already exists
       bookings.push({
         ...booking,
         createdAt: booking.createdAt || new Date().toISOString(),
@@ -56,7 +55,8 @@ export class BookingService {
   ): Observable<boolean> {
     const bookingsJson = localStorage.getItem(this.STORAGE_KEY);
     if (!bookingsJson) {
-      return of(true); // No bookings yet, so time slot is available
+      // No bookings yet, so time slot is available
+      return of(true);
     }
 
     try {
@@ -98,9 +98,5 @@ export class BookingService {
       console.error('Error deleting booking:', error);
       return of(false);
     }
-  }
-
-  private generateBookingId(): string {
-    return Date.now().toString() + Math.random().toString(36).substring(2, 9);
   }
 }
