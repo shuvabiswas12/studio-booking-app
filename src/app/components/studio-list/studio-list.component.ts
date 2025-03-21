@@ -6,6 +6,7 @@ import { Studio } from '../../models/studio.model';
 import { StudioCardComponent } from '../studio-card/studio-card.component';
 import { BookingFormComponent } from '../booking-form/booking-form.component';
 import { Booking } from '../../models/booking.model';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 @Component({
   selector: 'app-studio-list',
@@ -26,6 +27,11 @@ export class StudioListComponent implements OnInit {
   displayedStudios: Studio[] = [];
   searchTerm: string = '';
   noStudiosFound: boolean = false;
+
+  // Auto-suggestion properties
+  showSuggestions: boolean = false;
+  suggestions: string[] = [];
+  isRealTimeFiltering: boolean = false;
 
   // Radius search properties
   radiusOptions: number[] = [5, 10, 20, 30, 50];
@@ -57,14 +63,18 @@ export class StudioListComponent implements OnInit {
     this.loadStudios();
 
     // Subscribe to form control changes to filter studios
-    this.searchControl.valueChanges.subscribe((searchText) => {
-      this.isSearchingByRadius = false;
-      this.filterStudios();
-    });
+    this.searchControl.valueChanges
+      .pipe(debounceTime(200), distinctUntilChanged())
+      .subscribe((searchText) => {
+        this.isSearchingByRadius = false;
+        this.isRealTimeFiltering = true;
+        this.generateSuggestions(searchText || '');
+        this.filterStudios(searchText || '');
+      });
 
     this.priceRangeControl.valueChanges.subscribe((priceRange) => {
       this.isSearchingByRadius = false;
-      this.filterStudios();
+      this.filterStudios(this.searchControl.value || '');
     });
   }
 
@@ -90,9 +100,71 @@ export class StudioListComponent implements OnInit {
     });
   }
 
+  generateSuggestions(searchText: string): void {
+    if (!searchText || searchText.trim() === '') {
+      this.suggestions = [];
+      this.showSuggestions = false;
+      return;
+    }
+
+    const lowerSearchText = searchText.toLowerCase();
+
+    // Get unique suggestions from location areas only
+    const areaSuggestions = this.getUniqueSuggestions(
+      this.studios.map((studio) => studio.Location.Area),
+      lowerSearchText
+    );
+
+    // Get unique suggestions from location addresses
+    const addressSuggestions = this.getUniqueSuggestions(
+      this.studios.map((studio) => studio.Location.Address),
+      lowerSearchText
+    );
+
+    // Get unique suggestions for cities
+    const citySuggestions = this.getUniqueSuggestions(
+      this.studios.map((studio) => studio.Location.City),
+      lowerSearchText
+    );
+
+    // Combine and remove duplicates - only location-based suggestions
+    this.suggestions = [
+      ...new Set([
+        ...areaSuggestions,
+        ...addressSuggestions,
+        ...citySuggestions,
+      ]),
+    ];
+    this.showSuggestions = this.suggestions.length > 0;
+  }
+
+  getUniqueSuggestions(items: string[], searchText: string): string[] {
+    return items
+      .filter(
+        (item, index, self) =>
+          item.toLowerCase().includes(searchText) &&
+          self.indexOf(item) === index
+      )
+      .slice(0, 5); // Limit to 5 suggestions per category
+  }
+
+  selectSuggestion(suggestion: string): void {
+    this.searchControl.setValue(suggestion);
+    this.showSuggestions = false;
+    this.filterStudios(suggestion);
+  }
+
+  hideSearchSuggestions(): void {
+    // Small delay to allow click events to register before hiding suggestions
+    setTimeout(() => {
+      this.showSuggestions = false;
+    }, 200);
+  }
+
   searchByRadius(): void {
     this.locationError = null;
     this.isSearchingByRadius = false;
+    this.isRealTimeFiltering = false;
 
     if (!navigator.geolocation) {
       this.locationError = 'Geolocation is not supported by your browser';
@@ -184,6 +256,7 @@ export class StudioListComponent implements OnInit {
     this.searchControl.setValue('');
     this.priceRangeControl.setValue('all');
     this.isSearchingByRadius = false;
+    this.isRealTimeFiltering = false;
     this.locationError = null;
     this.filteredStudios = [...this.studios];
     this.updatePagination();
@@ -199,39 +272,25 @@ export class StudioListComponent implements OnInit {
     this.selectedStudio = null;
   }
 
-  filterStudios(): void {
-    const searchTerm = this.searchControl.value?.toLowerCase() || '';
-    const priceRange = this.priceRangeControl.value || 'all';
+  filterStudios(searchText?: string): void {
+    const searchTerm =
+      searchText?.toLowerCase() ||
+      this.searchControl.value?.toLowerCase() ||
+      '';
 
     // Reset radius search when using text search
-    if (searchTerm || priceRange !== 'all') {
+    if (searchTerm) {
       this.isSearchingByRadius = false;
     }
 
     this.filteredStudios = this.studios.filter((studio) => {
-      // Filter by search term
-      const matchesSearch =
-        studio.Name.toLowerCase().includes(searchTerm) ||
-        studio.Description.toLowerCase().includes(searchTerm) ||
-        studio.Type.toLowerCase().includes(searchTerm) ||
-        (studio.Location.Address &&
-          studio.Location.Address.toLowerCase().includes(searchTerm)) ||
+      // Filter by location only area
+      const matchesLocation =
+        searchTerm === '' ||
         (studio.Location.Area &&
           studio.Location.Area.toLowerCase().includes(searchTerm));
 
-      // Filter by price range
-      let matchesPrice = true;
-      const hourlyRate = studio.PricePerHour;
-
-      if (priceRange === '0-50') {
-        matchesPrice = hourlyRate < 50;
-      } else if (priceRange === '50-100') {
-        matchesPrice = hourlyRate >= 50 && hourlyRate <= 100;
-      } else if (priceRange === '100+') {
-        matchesPrice = hourlyRate > 100;
-      }
-
-      return matchesSearch && matchesPrice;
+      return matchesLocation;
     });
 
     this.noStudiosFound = this.filteredStudios.length === 0;

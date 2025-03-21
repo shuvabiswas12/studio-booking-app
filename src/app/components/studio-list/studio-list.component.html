@@ -4,16 +4,29 @@
     <!-- Search Panel -->
     <div class="search-panel mb-6">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-                <label for="searchInput" class="text-secondary mb-2 block">Search</label>
-                <input id="searchInput" type="text" [formControl]="searchControl"
-                    placeholder="Search studios by name, location" class="search-input">
-            </div>
-            <div>
-                <label for="priceRange" class="text-secondary mb-2 block">Price Range</label>
-                <select id="priceRange" [formControl]="priceRangeControl" class="select-input">
-                    <option *ngFor="let range of priceRanges" [value]="range.value">{{ range.label }}</option>
-                </select>
+            <div class="search-container">
+                <label for="searchInput" class="text-secondary mb-2 block">Search by Location</label>
+                <input id="searchInput" type="text" [formControl]="searchControl" placeholder="Search by area."
+                    class="search-input" [class.active-search]="isRealTimeFiltering && searchControl.value"
+                    (blur)="hideSearchSuggestions()">
+
+                <!-- Auto-suggestions dropdown -->
+                <div class="suggestions-dropdown" *ngIf="showSuggestions && suggestions.length > 0">
+                    <ul class="suggestions-list">
+                        <li *ngFor="let suggestion of suggestions" (click)="selectSuggestion(suggestion)"
+                            class="suggestion-item">
+                            {{ suggestion }}
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Real-time filtering message -->
+                <div *ngIf="isRealTimeFiltering && searchControl.value && !showSuggestions" class="filter-info mt-2">
+                    <span *ngIf="filteredStudios.length > 0">Showing {{ filteredStudios.length }} studios in location
+                        "{{ searchControl.value }}"</span>
+                    <span *ngIf="filteredStudios.length === 0">No studios found in location
+                        "{{ searchControl.value }}"</span>
+                </div>
             </div>
         </div>
 
@@ -43,8 +56,10 @@
 
     <!-- Studio Grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <app-studio-card *ngFor="let studio of displayedStudios" [studio]="studio" (bookNow)="onBookStudio($event)"
-            (showDetails)="onShowDetails($event)"></app-studio-card>
+        <ng-container *ngFor="let studio of displayedStudios">
+            <app-studio-card [studio]="studio" (bookNow)="onBookStudio($event)"
+                (showDetails)="onShowDetails($event)"></app-studio-card>
+        </ng-container>
     </div>
 
     <!-- Pagination -->
