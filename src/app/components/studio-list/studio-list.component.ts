@@ -58,6 +58,10 @@ export class StudioListComponent implements OnInit {
     { value: '100+', label: 'Over $100/hr' },
   ];
 
+  // Properties for UI state
+  isLoading: boolean = true;
+  noStudiosInRadius: boolean = false;
+
   constructor(private studioService: StudioService) {}
 
   @HostListener('window:keydown', ['$event'])
@@ -357,6 +361,10 @@ export class StudioListComponent implements OnInit {
     this.isSearchingByRadius = true;
     this.isRealTimeFiltering = false;
     this.noStudiosFound = this.filteredStudios.length === 0;
+
+    // Add more specific flag for radius search with no results
+    this.noStudiosInRadius = this.filteredStudios.length === 0;
+
     this.currentPage = 1;
     this.updatePagination();
   }
@@ -392,6 +400,7 @@ export class StudioListComponent implements OnInit {
     this.isSearchingByRadius = false;
     this.isRealTimeFiltering = false;
     this.locationError = null;
+    this.noStudiosInRadius = false;
     this.filteredStudios = [...this.studios];
     this.updatePagination();
   }

@@ -28,7 +28,7 @@
         </div>
 
         <!-- Bookings Cards -->
-        <div *ngIf="!isLoading && bookings.length > 0" class="booking-list">
+        <div *ngIf="!isLoading && bookings.length > 0" class="booking-list w-100">
             <div class="booking-filter">
                 <div class="filter-control">
                     <label for="sort">Sort by:</label>
@@ -48,7 +48,7 @@
                 </div>
             </div>
 
-            <div class="booking-grid">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div *ngFor="let booking of bookings" class="booking-card">
                     <div class="booking-card-header">
                         <div class="booking-studio">{{ booking.studioName }}</div>
