@@ -230,15 +230,65 @@ export class StudioListComponent implements OnInit {
     }, 200);
   }
 
-  searchByRadius(): void {
-    this.locationError = null;
-    this.isSearchingByRadius = false;
-    this.isRealTimeFiltering = false;
+  // Auto-run radius search when user location is available
+  runRadiusSearchIfLocationAvailable(): void {
+    if (this.userLocation) {
+      this.performRadiusSearch();
+    } else {
+      this.getUserLocation();
+    }
+  }
 
+  // Get user location once
+  getUserLocation(): void {
+    this.locationError = null;
+
+    // Check if geolocation is supported
     if (!navigator.geolocation) {
       this.locationError = 'Geolocation is not supported by your browser';
       return;
     }
+
+    // Check if we have permission for geolocation
+    if (navigator.permissions && navigator.permissions.query) {
+      navigator.permissions
+        .query({ name: 'geolocation' })
+        .then((permissionStatus) => {
+          if (permissionStatus.state === 'denied') {
+            this.locationError =
+              'Location access is blocked. Please enable location in your browser settings and try again.';
+            return;
+          }
+
+          // Get the location if permissions are granted or prompt the user
+          this.getGeoLocation();
+
+          // Listen for permission changes
+          permissionStatus.addEventListener('change', () => {
+            if (permissionStatus.state === 'granted') {
+              this.getGeoLocation();
+            } else if (permissionStatus.state === 'denied') {
+              this.locationError =
+                'Location access was denied. Please enable location in your browser settings and try again.';
+            }
+          });
+        });
+    } else {
+      // Fallback for browsers that don't support permissions API
+      this.getGeoLocation();
+    }
+  }
+
+  // Separate method to get the actual geolocation
+  private getGeoLocation(): void {
+    // Show loading state
+    this.locationError = 'Requesting your location...';
+
+    const options = {
+      enableHighAccuracy: true,
+      timeout: 10000,
+      maximumAge: 0,
+    };
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
@@ -246,12 +296,25 @@ export class StudioListComponent implements OnInit {
           lat: position.coords.latitude,
           lng: position.coords.longitude,
         };
+        this.locationError = null;
         this.performRadiusSearch();
       },
       (error) => {
         this.handleLocationError(error);
-      }
+      },
+      options
     );
+  }
+
+  searchByRadius(): void {
+    this.runRadiusSearchIfLocationAvailable();
+  }
+
+  // Called when radius selection changes
+  onRadiusChange(): void {
+    if (this.isSearchingByRadius && this.userLocation) {
+      this.performRadiusSearch();
+    }
   }
 
   handleLocationError(error: GeolocationPositionError): void {
@@ -290,7 +353,9 @@ export class StudioListComponent implements OnInit {
       return distance <= radiusInKm;
     });
 
+    // Set flags for UI updates
     this.isSearchingByRadius = true;
+    this.isRealTimeFiltering = false;
     this.noStudiosFound = this.filteredStudios.length === 0;
     this.currentPage = 1;
     this.updatePagination();

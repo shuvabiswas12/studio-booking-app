@@ -79,7 +79,7 @@
                     </div>
 
                     <div class="booking-card-footer">
-                        <div class="booking-price">{{ booking.totalPrice | currency }}</div>
+                        <div class="booking-price">{{ booking.totalPrice | currency: 'BDT' }}</div>
                         <button (click)="deleteBooking(booking.id)" class="btn-cancel">
                             <i class="fas fa-times"></i> Cancel Booking
                         </button>

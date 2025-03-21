@@ -35,16 +35,28 @@
         <div class="mt-4">
             <label class="text-secondary mb-2 block">Search By Radius</label>
             <div class="flex flex-wrap gap-3">
-                <select [(ngModel)]="selectedRadius" class="select-input" style="max-width: 150px;">
+                <select [(ngModel)]="selectedRadius" (ngModelChange)="onRadiusChange()" class="select-input"
+                    style="max-width: 150px;">
                     <option *ngFor="let radius of radiusOptions" [value]="radius">{{ radius }} KM</option>
                 </select>
-                <button (click)="searchByRadius()" class="btn-primary">Search Near Me</button>
+                <button (click)="searchByRadius()" class="btn-primary">
+                    <i class="fas fa-location-dot mr-1"></i> Search Near Me
+                </button>
                 <button (click)="resetFilters()" class="btn-secondary">Reset Filters</button>
             </div>
-            <div *ngIf="locationError" class="error-message mt-2">
+
+            <!-- Location request/error message -->
+            <div *ngIf="locationError" class="location-message mt-2"
+                [class.location-loading]="locationError === 'Requesting your location...'"
+                [class.location-error]="locationError !== 'Requesting your location...'">
+                <i *ngIf="locationError === 'Requesting your location...'" class="fas fa-spinner fa-spin mr-1"></i>
+                <i *ngIf="locationError !== 'Requesting your location...'" class="fas fa-exclamation-circle mr-1"></i>
                 {{ locationError }}
             </div>
-            <div *ngIf="isSearchingByRadius" class="info-message mt-2">
+
+            <!-- Radius search active message -->
+            <div *ngIf="isSearchingByRadius && !locationError" class="location-success mt-2">
+                <i class="fas fa-check-circle mr-1"></i>
                 Showing studios within {{ selectedRadius }} KM of your location
             </div>
         </div>
