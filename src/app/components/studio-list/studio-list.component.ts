@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormControl } from '@angular/forms';
 import { StudioService } from '../../services/studio.service';
@@ -32,6 +32,7 @@ export class StudioListComponent implements OnInit {
   showSuggestions: boolean = false;
   suggestions: string[] = [];
   isRealTimeFiltering: boolean = false;
+  currentSuggestionIndex: number = -1; // Track selected suggestion
 
   // Radius search properties
   radiusOptions: number[] = [5, 10, 20, 30, 50];
@@ -59,6 +60,59 @@ export class StudioListComponent implements OnInit {
 
   constructor(private studioService: StudioService) {}
 
+  @HostListener('window:keydown', ['$event'])
+  handleKeyDown(event: KeyboardEvent): void {
+    // Only handle keyboard events when suggestions are visible
+    if (!this.showSuggestions || this.suggestions.length === 0) {
+      return;
+    }
+
+    switch (event.key) {
+      case 'ArrowDown':
+        event.preventDefault(); // Prevent scrolling the page
+        this.navigateSuggestion(1);
+        break;
+      case 'ArrowUp':
+        event.preventDefault(); // Prevent scrolling the page
+        this.navigateSuggestion(-1);
+        break;
+      case 'Enter':
+        if (
+          this.currentSuggestionIndex >= 0 &&
+          this.currentSuggestionIndex < this.suggestions.length
+        ) {
+          event.preventDefault();
+          this.selectSuggestion(this.suggestions[this.currentSuggestionIndex]);
+        }
+        break;
+      case 'Escape':
+        this.showSuggestions = false;
+        this.currentSuggestionIndex = -1;
+        break;
+    }
+  }
+
+  navigateSuggestion(direction: number): void {
+    // Calculate the new index with wrapping
+    const newIndex = this.currentSuggestionIndex + direction;
+
+    if (newIndex < 0) {
+      // Wrap to the end when going up from the first item
+      this.currentSuggestionIndex = this.suggestions.length - 1;
+    } else if (newIndex >= this.suggestions.length) {
+      // Wrap to the beginning when going down from the last item
+      this.currentSuggestionIndex = 0;
+    } else {
+      this.currentSuggestionIndex = newIndex;
+    }
+
+    // Preview the selected suggestion in the input field
+    const selectedSuggestion = this.suggestions[this.currentSuggestionIndex];
+    if (selectedSuggestion) {
+      this.searchControl.setValue(selectedSuggestion, { emitEvent: false });
+    }
+  }
+
   ngOnInit(): void {
     this.loadStudios();
 
@@ -68,6 +122,7 @@ export class StudioListComponent implements OnInit {
       .subscribe((searchText) => {
         this.isSearchingByRadius = false;
         this.isRealTimeFiltering = true;
+        this.currentSuggestionIndex = -1; // Reset selected index when input changes
         this.generateSuggestions(searchText || '');
         this.filterStudios(searchText || '');
       });
@@ -142,6 +197,7 @@ export class StudioListComponent implements OnInit {
     return items
       .filter(
         (item, index, self) =>
+          item &&
           item.toLowerCase().includes(searchText) &&
           self.indexOf(item) === index
       )
@@ -149,15 +205,28 @@ export class StudioListComponent implements OnInit {
   }
 
   selectSuggestion(suggestion: string): void {
+    // Set the selected suggestion as the search input value
     this.searchControl.setValue(suggestion);
-    this.showSuggestions = false;
-    this.filterStudios(suggestion);
+
+    // Small delay to ensure the value is set before hiding the suggestions
+    setTimeout(() => {
+      // Close the suggestions dropdown
+      this.showSuggestions = false;
+      this.currentSuggestionIndex = -1; // Reset selected index
+
+      // Filter studios based on the selected suggestion
+      this.filterStudios(suggestion);
+
+      // Focus back on the input field for better UX
+      document.getElementById('searchInput')?.focus();
+    }, 50);
   }
 
   hideSearchSuggestions(): void {
     // Small delay to allow click events to register before hiding suggestions
     setTimeout(() => {
       this.showSuggestions = false;
+      this.currentSuggestionIndex = -1; // Reset selected index
     }, 200);
   }
 

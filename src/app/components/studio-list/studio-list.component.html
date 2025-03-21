@@ -8,13 +8,14 @@
                 <label for="searchInput" class="text-secondary mb-2 block">Search by Location</label>
                 <input id="searchInput" type="text" [formControl]="searchControl" placeholder="Search by area."
                     class="search-input" [class.active-search]="isRealTimeFiltering && searchControl.value"
-                    (blur)="hideSearchSuggestions()">
+                    (blur)="hideSearchSuggestions()" autocomplete="off">
 
                 <!-- Auto-suggestions dropdown -->
                 <div class="suggestions-dropdown" *ngIf="showSuggestions && suggestions.length > 0">
                     <ul class="suggestions-list">
-                        <li *ngFor="let suggestion of suggestions" (click)="selectSuggestion(suggestion)"
-                            class="suggestion-item">
+                        <li *ngFor="let suggestion of suggestions; let i = index"
+                            (mousedown)="selectSuggestion(suggestion)" (mouseover)="currentSuggestionIndex = i"
+                            class="suggestion-item" [class.active]="i === currentSuggestionIndex">
                             {{ suggestion }}
                         </li>
                     </ul>
@@ -23,7 +24,7 @@
                 <!-- Real-time filtering message -->
                 <div *ngIf="isRealTimeFiltering && searchControl.value && !showSuggestions" class="filter-info mt-2">
                     <span *ngIf="filteredStudios.length > 0">Showing {{ filteredStudios.length }} studios in location
-                        "{{ searchControl.value }}"</span>
+                        "{{ searchControl.value }}" area</span>
                     <span *ngIf="filteredStudios.length === 0">No studios found in location
                         "{{ searchControl.value }}"</span>
                 </div>
