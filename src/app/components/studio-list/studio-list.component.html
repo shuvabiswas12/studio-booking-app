@@ -3,11 +3,11 @@
 
     <!-- Search Panel -->
     <div class="search-panel mb-6">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
                 <label for="searchInput" class="text-secondary mb-2 block">Search</label>
                 <input id="searchInput" type="text" [formControl]="searchControl"
-                    placeholder="Search studios by name, location..." class="search-input">
+                    placeholder="Search studios by name, location" class="search-input">
             </div>
             <div>
                 <label for="priceRange" class="text-secondary mb-2 block">Price Range</label>
@@ -15,19 +15,24 @@
                     <option *ngFor="let range of priceRanges" [value]="range.value">{{ range.label }}</option>
                 </select>
             </div>
-            <div>
-                <label for="areaSelect" class="text-secondary mb-2 block">Area</label>
-                <select id="areaSelect" [(ngModel)]="selectedArea" (ngModelChange)="onAreaChange()"
-                    class="select-input">
-                    <option value="">All Areas</option>
-                    <option *ngFor="let area of areas" [value]="area">{{ area }}</option>
-                </select>
-            </div>
         </div>
 
-        <!-- Filters Reset Button -->
-        <div class="mt-4 text-right">
-            <button (click)="resetFilters()" class="btn-secondary">Reset Filters</button>
+        <!-- Radius Search -->
+        <div class="mt-4">
+            <label class="text-secondary mb-2 block">Search By Radius</label>
+            <div class="flex flex-wrap gap-3">
+                <select [(ngModel)]="selectedRadius" class="select-input" style="max-width: 150px;">
+                    <option *ngFor="let radius of radiusOptions" [value]="radius">{{ radius }} KM</option>
+                </select>
+                <button (click)="searchByRadius()" class="btn-primary">Search Near Me</button>
+                <button (click)="resetFilters()" class="btn-secondary">Reset Filters</button>
+            </div>
+            <div *ngIf="locationError" class="error-message mt-2">
+                {{ locationError }}
+            </div>
+            <div *ngIf="isSearchingByRadius" class="info-message mt-2">
+                Showing studios within {{ selectedRadius }} KM of your location
+            </div>
         </div>
     </div>
 

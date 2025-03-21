@@ -24,10 +24,15 @@ export class StudioListComponent implements OnInit {
   studios: Studio[] = [];
   filteredStudios: Studio[] = [];
   displayedStudios: Studio[] = [];
-  areas: string[] = [];
   searchTerm: string = '';
-  selectedArea: string = '';
   noStudiosFound: boolean = false;
+
+  // Radius search properties
+  radiusOptions: number[] = [5, 10, 20, 30, 50];
+  selectedRadius: number = 10;
+  isSearchingByRadius: boolean = false;
+  locationError: string | null = null;
+  userLocation: { lat: number; lng: number } | null = null;
 
   // Pagination properties
   currentPage: number = 1;
@@ -50,14 +55,15 @@ export class StudioListComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadStudios();
-    this.loadAreas();
 
     // Subscribe to form control changes to filter studios
     this.searchControl.valueChanges.subscribe((searchText) => {
+      this.isSearchingByRadius = false;
       this.filterStudios();
     });
 
     this.priceRangeControl.valueChanges.subscribe((priceRange) => {
+      this.isSearchingByRadius = false;
       this.filterStudios();
     });
   }
@@ -67,7 +73,6 @@ export class StudioListComponent implements OnInit {
       (data) => {
         this.studios = data;
         this.filteredStudios = data;
-        this.extractAreas();
         this.updateTotalPages();
         this.updateDisplayedStudios();
       },
@@ -85,29 +90,101 @@ export class StudioListComponent implements OnInit {
     });
   }
 
-  loadAreas(): void {
-    this.studioService.getUniqueAreas().subscribe(
-      (areas) => {
-        this.areas = areas;
+  searchByRadius(): void {
+    this.locationError = null;
+    this.isSearchingByRadius = false;
+
+    if (!navigator.geolocation) {
+      this.locationError = 'Geolocation is not supported by your browser';
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        this.userLocation = {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        };
+        this.performRadiusSearch();
       },
       (error) => {
-        console.error('Error loading areas:', error);
+        this.handleLocationError(error);
       }
     );
   }
 
-  onAreaChange(): void {
-    this.studioService.searchByArea(this.selectedArea);
+  handleLocationError(error: GeolocationPositionError): void {
+    switch (error.code) {
+      case error.PERMISSION_DENIED:
+        this.locationError = 'Location access was denied by the user';
+        break;
+      case error.POSITION_UNAVAILABLE:
+        this.locationError = 'Location information is unavailable';
+        break;
+      case error.TIMEOUT:
+        this.locationError = 'The request to get user location timed out';
+        break;
+      default:
+        this.locationError =
+          'An unknown error occurred while retrieving location';
+        break;
+    }
   }
 
-  onAreaSearch(): void {
-    this.studioService.searchByArea(this.searchTerm);
+  performRadiusSearch(): void {
+    if (!this.userLocation) return;
+
+    const radiusInKm = this.selectedRadius;
+
+    this.filteredStudios = this.studios.filter((studio) => {
+      if (!studio.Location.Coordinates) return false;
+
+      const distance = this.calculateDistance(
+        this.userLocation!.lat,
+        this.userLocation!.lng,
+        studio.Location.Coordinates.Latitude,
+        studio.Location.Coordinates.Longitude
+      );
+
+      return distance <= radiusInKm;
+    });
+
+    this.isSearchingByRadius = true;
+    this.noStudiosFound = this.filteredStudios.length === 0;
+    this.currentPage = 1;
+    this.updatePagination();
+  }
+
+  calculateDistance(
+    lat1: number,
+    lon1: number,
+    lat2: number,
+    lon2: number
+  ): number {
+    // Haversine formula to calculate distance between two points on Earth
+    const R = 6371; // Radius of the Earth in km
+    const dLat = this.deg2rad(lat2 - lat1);
+    const dLon = this.deg2rad(lon2 - lon1);
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(this.deg2rad(lat1)) *
+        Math.cos(this.deg2rad(lat2)) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const distance = R * c; // Distance in km
+    return distance;
+  }
+
+  deg2rad(deg: number): number {
+    return deg * (Math.PI / 180);
   }
 
   resetFilters(): void {
     this.searchControl.setValue('');
     this.priceRangeControl.setValue('all');
-    this.selectedArea = '';
+    this.isSearchingByRadius = false;
+    this.locationError = null;
     this.filteredStudios = [...this.studios];
     this.updatePagination();
   }
@@ -125,6 +202,11 @@ export class StudioListComponent implements OnInit {
   filterStudios(): void {
     const searchTerm = this.searchControl.value?.toLowerCase() || '';
     const priceRange = this.priceRangeControl.value || 'all';
+
+    // Reset radius search when using text search
+    if (searchTerm || priceRange !== 'all') {
+      this.isSearchingByRadius = false;
+    }
 
     this.filteredStudios = this.studios.filter((studio) => {
       // Filter by search term
@@ -149,11 +231,7 @@ export class StudioListComponent implements OnInit {
         matchesPrice = hourlyRate > 100;
       }
 
-      // Filter by area
-      const matchesArea =
-        !this.selectedArea || studio.Location.Area === this.selectedArea;
-
-      return matchesSearch && matchesPrice && matchesArea;
+      return matchesSearch && matchesPrice;
     });
 
     this.noStudiosFound = this.filteredStudios.length === 0;
@@ -271,17 +349,6 @@ export class StudioListComponent implements OnInit {
         document.body.removeChild(toast);
       }
     }, 5000);
-  }
-
-  extractAreas(): void {
-    // Extract unique areas from studios
-    const areaSet = new Set<string>();
-    this.studios.forEach((studio) => {
-      if (studio.Location.Area) {
-        areaSet.add(studio.Location.Area);
-      }
-    });
-    this.areas = Array.from(areaSet).sort();
   }
 
   updatePagination(): void {
